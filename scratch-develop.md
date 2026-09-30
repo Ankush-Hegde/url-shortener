@@ -11,6 +11,9 @@ Initialized empty Git repository in C:/Users/user-name/folder/path/system design
 
 > git branch -M main
 > git remote add origin https://github.com/Ankush-Hegde/url-shortener.git
+> git add .
+> git commit -m "initial commit"
+> git push --set-upstream origin main
 
 > go mod init url-shortener
 
