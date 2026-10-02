@@ -1,51 +1,68 @@
 openapi: 3.0.3
+
 info:
   title: URL Shortener API
   version: 1.0.0
 
 servers:
-  - url: https://api.example.com/v1
-    description: Optional server description, e.g. Main (production) server
+- description: "Optional server description, e.g. Main (production) server"
+  url: https://api.example.com/v1
 
 paths:
+
   /shorten:
     post:
-      summary: Create a short URL
       requestBody:
-        required: true
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - long_url
-              properties:
-                long_url:
-                  type: string
-                  format: uri
+              $ref: "#/components/schemas/_shorten_post_request"
+        required: true
       responses:
-        '201':
-          description: Created
+        "201":
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  short_code:
-                    type: string
-                  short_url:
-                    type: string
+                $ref: "#/components/schemas/_shorten_post_201_response"
+          description: Created
+      summary: Create a short URL
+
   /{short_code}:
     get:
-      summary: Redirect to the original URL
       parameters:
-        - name: short_code
-          in: path
-          required: true
-          schema:
-            type: string
+      - explode: false
+        in: path
+        name: short_code
+        required: true
+        schema:
+          type: string
+        style: simple
       responses:
-        '302':
+        "302":
           description: Redirection to long URL
-        '404':
+        "404":
           description: URL not found
+      summary: Redirect to the original URL
+
+components:
+  schemas:
+    
+    _shorten_post_request:
+      properties:
+        long_url:
+          format: uri
+          type: string
+      required:
+      - long_url
+      type: object
+    
+    _shorten_post_201_response:
+      example:
+        short_code: short_code
+        short_url: short_url
+      properties:
+        short_code:
+          type: string
+        short_url:
+          type: string
+      type: object
