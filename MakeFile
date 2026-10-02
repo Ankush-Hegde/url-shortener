@@ -1,6 +1,7 @@
 App=url-shortener
-GEN_TOOL="./api/tool/openapi-generator-cli.jar"
+GEN_TOOL="./tools/openapi-generator-cli.jar"
 OPEN_API_GENERATOR_IGNORE="./api/.openapi-generator-ignore"
+URL_SHORTENER_OPENAPI_SPEC="api/url-shortener.openapi.yaml"
 
 build:
 	go build -o bin/$(APP) cmd/url_shortener/main.go
@@ -18,17 +19,17 @@ docker:
 	docker build -t $(APP) .
 
 generate-server:
-	@if [ -d "internal/pkg/gen" ]; then \
+	@if [ -d "internal/pkg/server/gen" ]; then \
 		echo "Removing existing generated server code..."; \
-		rm -r internal/pkg/gen; \
+		rm -r internal/pkg/server/gen; \
 	fi
 	@if [ ! -d "internal/pkg/server" ]; then \
 		echo "Target directory missing. Initializing workspace layout..."; \
 		mkdir -p internal/pkg/server; \
-		cp $(OPEN_API_GENERATOR_IGNORE) internal/pkg/server/; \
 	fi
+	@cp $(OPEN_API_GENERATOR_IGNORE) internal/pkg/server/; \
 	java -jar $(GEN_TOOL) generate \
-		-i api/url-shortener.openapi.yaml \
+		-i $(URL_SHORTENER_OPENAPI_SPEC) \
 		-g go-server \
 		-o internal/pkg/server/ \
 		-c server-config.yml
