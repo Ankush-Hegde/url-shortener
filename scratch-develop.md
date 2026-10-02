@@ -62,7 +62,7 @@ go: added github.com/gorilla/mux v1.8.1
 go: warning: "all" matched no packages
 ```
 
-create a open api spec and download tool to generate code,
+create a open api spec and download tool to generate code, check ./api/readme.md
 ```
 > wget https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/7.25.0/openapi-generator-cli-7.25.0.jar -O openapi-generator-cli.jar
 --2026-10-02 17:40:58--  https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/7.25.0/openapi-generator-cli-7.25.0.jar

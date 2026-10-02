@@ -1,0 +1,14 @@
+# Ignore global environment and setup configurations
+main.go
+go.mod
+go.sum
+Dockerfile
+compose.yaml
+README.md
+.gitignore
+git_push.sh
+
+# Ignore engine framework metadata
+api/**
+.openapi-generator/**
+.openapi-generator-ignore
