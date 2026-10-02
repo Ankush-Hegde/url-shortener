@@ -1,0 +1,51 @@
+openapi: 3.0.3
+info:
+  title: URL Shortener API
+  version: 1.0.0
+
+servers:
+  - url: https://api.example.com/v1
+    description: Optional server description, e.g. Main (production) server
+
+paths:
+  /shorten:
+    post:
+      summary: Create a short URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - long_url
+              properties:
+                long_url:
+                  type: string
+                  format: uri
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  short_code:
+                    type: string
+                  short_url:
+                    type: string
+  /{short_code}:
+    get:
+      summary: Redirect to the original URL
+      parameters:
+        - name: short_code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirection to long URL
+        '404':
+          description: URL not found
