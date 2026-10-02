@@ -1,0 +1,5 @@
+router: "mux"
+packageName: gen
+sourceFolder: gen
+hideGenerationTimestamp: true
+disallowAdditionalPropertiesIfNotPresent: false

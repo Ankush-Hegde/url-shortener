@@ -1,4 +1,5 @@
 App=url-shortener
+GEN_TOOL="./api/tool/openapi-generator-cli.jar"
 
 build:
 	go build -o bin/$(APP) cmd/url_shortener/main.go
@@ -16,8 +17,9 @@ docker:
 	docker build -t $(APP) .
 
 generate-server:
-	java -jar ./api/tool/openapi-generator-cli.jar generate \
-		-i api/url-shortener.yaml \
+	java -jar $(GEN_TOOL) generate \
+		-i api/url-shortener.openapi.yaml \
 		-g go-server \
-		-o gen \
-		--additional-properties=router=mux,packageName=gen,sourceFolder=""
+		-o internal/pkg/server/ \
+		-c server-config.yml
+# 		--additional-properties=router=mux,packageName=gen,sourceFolder=""
