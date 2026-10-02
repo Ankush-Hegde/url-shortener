@@ -1,0 +1,7 @@
+properties:
+  long_url:
+    format: uri
+    type: string
+required:
+- long_url
+type: object

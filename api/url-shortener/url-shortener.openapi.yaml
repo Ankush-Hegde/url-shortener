@@ -48,21 +48,7 @@ components:
   schemas:
     
     _shorten_post_request:
-      properties:
-        long_url:
-          format: uri
-          type: string
-      required:
-      - long_url
-      type: object
+      $ref: "./schemas/shorten-post-request.yaml"
     
     _shorten_post_201_response:
-      example:
-        short_code: short_code
-        short_url: short_url
-      properties:
-        short_code:
-          type: string
-        short_url:
-          type: string
-      type: object
+      $ref: "./schemas/shorten-post-201-response.yaml"
