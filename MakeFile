@@ -18,9 +18,21 @@ docker:
 	docker build -t $(APP) .
 
 generate-server:
-	@cp $(OPEN_API_GENERATOR_IGNORE) internal/pkg/server/
+	@if [ -d "internal/pkg/gen" ]; then \
+		echo "Removing existing generated server code..."; \
+		rm -r internal/pkg/gen; \
+	fi
+	@if [ ! -d "internal/pkg/server" ]; then \
+		echo "Target directory missing. Initializing workspace layout..."; \
+		mkdir -p internal/pkg/server; \
+		cp $(OPEN_API_GENERATOR_IGNORE) internal/pkg/server/; \
+	fi
 	java -jar $(GEN_TOOL) generate \
 		-i api/url-shortener.openapi.yaml \
 		-g go-server \
 		-o internal/pkg/server/ \
 		-c server-config.yml
+	
+	@echo "Cleaning up generator metadata artifacts..."
+	@rm -rf internal/pkg/server/.openapi-generator
+	rm  internal/pkg/server/.openapi-generator-ignore
