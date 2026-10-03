@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"path/filepath"
 	"url-shortener/internal/pkg/server/gen"
 	"url-shortener/internal/pkg/server/middleware"
 	"url-shortener/internal/pkg/server/service"
@@ -40,6 +41,14 @@ func setupRoutes() {
 
 	// register Prometheus metrics endpoint
 	router.Handle("/management/prometheus", promhttp.Handler())
+
+	// -----swagger-ui-----
+	openApiYamlDir := filepath.Join("api", "url-shortener")
+	router.PathPrefix("/api/url-shortener/").Handler(http.StripPrefix("/api/url-shortener/", http.FileServer(http.Dir(openApiYamlDir))))
+
+	swaggerDir := filepath.Join("third_party", "swagger-ui", "dist")
+	router.PathPrefix("").Handler(http.FileServer(http.Dir(swaggerDir)))
+	// ---------------------
 
 	// middleware
 	router.Use(middleware.ValidateRequestMiddleware)
