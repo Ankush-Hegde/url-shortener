@@ -6,7 +6,7 @@ info:
 
 servers:
 - description: "Optional server description, e.g. Main (production) server"
-  url: https://api.example.com/v1
+  url: http://localhost:8089/v1
 
 paths:
 

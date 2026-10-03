@@ -60,6 +60,7 @@ func setupRoutes() {
 
 	// middleware
 	router.Use(middleware.ValidateRequestMiddleware)
+	router.Use(middleware.CorsMiddleware)
 }
 
 func registerControllers(routers []gen.Router) {
