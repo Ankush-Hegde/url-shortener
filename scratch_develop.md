@@ -96,3 +96,9 @@ java -jar ./api/tool/openapi-generator-cli.jar generate \
 ############################################################################################
 ```
 
+clone swager ui repo in ./third_party/ folder<br>
+run server ```go run cmd\url_shortener\main.go```<br>
+get api doc in
+```
+http://localhost:8089/doc/swagger-ui/
+```

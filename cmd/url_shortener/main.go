@@ -47,7 +47,15 @@ func setupRoutes() {
 	router.PathPrefix("/api/url-shortener/").Handler(http.StripPrefix("/api/url-shortener/", http.FileServer(http.Dir(openApiYamlDir))))
 
 	swaggerDir := filepath.Join("third_party", "swagger-ui", "dist")
-	router.PathPrefix("").Handler(http.FileServer(http.Dir(swaggerDir)))
+	router.HandleFunc("/doc/swagger-ui/swagger-initializer.js", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join(openApiYamlDir, "swagger-initializer.js"))
+	}).Methods(http.MethodGet)
+	router.HandleFunc("/doc/swagger-ui", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/doc/swagger-ui/", http.StatusMovedPermanently)
+	}).Methods(http.MethodGet)
+	router.PathPrefix("/doc/swagger-ui/").Handler(
+		http.StripPrefix("/doc/swagger-ui/", http.FileServer(http.Dir(swaggerDir))),
+	)
 	// ---------------------
 
 	// middleware
