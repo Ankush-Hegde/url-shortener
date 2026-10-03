@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"url-shortener/config"
 	"url-shortener/internal/pkg/server/gen"
 	"url-shortener/internal/pkg/server/middleware"
 	"url-shortener/internal/pkg/server/service"
@@ -81,13 +82,17 @@ func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	slog.SetDefault(logger)
 
-	// load env
+	cfg, err := config.LoadConfig(".")
+	if err != nil {
+		slog.Error("Could not load environment config", "error", err)
+		os.Exit(1)
+	}
 
 	setupRoutes()
-	port := 8089
-
-	err := http.ListenAndServe(fmt.Sprintf(":%d", port), router)
-	if err != nil {
-		slog.Error("Server failed to start", "err", err)
+	address := fmt.Sprintf(":%s", cfg.ServerPort)
+	slog.Info("Starting URL shortener server", "address", address)
+	if err := http.ListenAndServe(address, router); err != nil {
+		slog.Error("Server failed to start", "address", address, "error", err)
+		os.Exit(1)
 	}
 }
