@@ -13,7 +13,9 @@ import (
 type Config struct {
 	ServiceName   string `mapstructure:"SERVICE_NAME"`
 	ServerPort    string `mapstructure:"SERVICE_PORT"`
-	MongoHost     string `mapstructure:"MONGO_HOST"`
+	MongoURI      string `mapstructure:"MONGODB_CONNECTION_STRING"`
+	MongoUsername string `mapstructure:"MONGODB_USERNAME"`
+	MongoPassword string `mapstructure:"MONGODB_PASSWORD"`
 	RedisAddr     string `mapstructure:"REDIS_HOST"`
 	RedisUsername string `mapstructure:"REDIS_USERNAME"`
 	RedisPassword string `mapstructure:"REDIS_PASSWORD"`
@@ -35,7 +37,9 @@ func LoadConfig(path string) (Config, error) {
 	for _, key := range []string{
 		"SERVICE_NAME",
 		"SERVICE_PORT",
-		"MONGO_HOST",
+		"MONGODB_CONNECTION_STRING",
+		"MONGODB_USERNAME",
+		"MONGODB_PASSWORD",
 		"REDIS_HOST",
 		"REDIS_USERNAME",
 		"REDIS_PASSWORD",

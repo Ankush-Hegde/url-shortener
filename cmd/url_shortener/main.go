@@ -1,12 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 	"url-shortener/config"
+	"url-shortener/internal/pkg/database/mongodb"
 	"url-shortener/internal/pkg/server/gen"
 	"url-shortener/internal/pkg/server/middleware"
 	"url-shortener/internal/pkg/server/service"
@@ -82,17 +85,36 @@ func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	slog.SetDefault(logger)
 
-	cfg, err := config.LoadConfig(".")
-	if err != nil {
-		slog.Error("Could not load environment config", "error", err)
+	if err := run(); err != nil {
+		slog.Error("URL shortener exited", "error", err)
 		os.Exit(1)
 	}
+}
+
+func run() error {
+	cfg, err := config.LoadConfig(".")
+	if err != nil {
+		return fmt.Errorf("load environment config: %w", err)
+	}
+
+	mongoClient, err := mongodb.Connect(context.Background(), cfg.MongoURI)
+	if err != nil {
+		return fmt.Errorf("connect to MongoDB: %w", err)
+	}
+	defer func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := mongoClient.Disconnect(ctx); err != nil {
+			slog.Error("Failed to disconnect from MongoDB", "error", err)
+		}
+	}()
+	slog.Info("Connected to MongoDB")
 
 	setupRoutes()
 	address := fmt.Sprintf(":%s", cfg.ServerPort)
 	slog.Info("Starting URL shortener server", "address", address)
 	if err := http.ListenAndServe(address, router); err != nil {
-		slog.Error("Server failed to start", "address", address, "error", err)
-		os.Exit(1)
+		return fmt.Errorf("server failed on %s: %w", address, err)
 	}
+	return nil
 }
