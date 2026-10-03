@@ -1,5 +1,5 @@
 package resolveshorturl
 
 func ResolveShortURL(shortCode string) (string, error) {
-	return "", nil
+	return "s", nil
 }
