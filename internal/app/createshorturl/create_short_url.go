@@ -43,14 +43,17 @@ func CreateShortURL(ctx context.Context, longURL string, store MappingStore, cac
 		return Result{}, fmt.Errorf("check for existing URL mapping: %w", err)
 	}
 
+	if shortCode != "" {
+		slog.Info("URL retrived from cache", "short_code", shortCode, "error", err)
+	}
+
 	if errors.Is(err, mongodb.ErrMappingNotFound) {
 		shortCode, err = createEntry(ctx, store, longURL)
+		slog.Info("URL mapping saved in MongoDB but not cached in Redis", "short_code", shortCode, "error", err)
 		if err != nil {
 			return Result{}, err
 		}
 	}
-
-	slog.Warn("URL mapping saved in MongoDB but not cached in Redis", "short_code", shortCode, "error", err)
 
 	return Result{
 		ShortCode: shortCode,
