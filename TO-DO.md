@@ -1,4 +1,5 @@
--> make it work
+-> remove os.get()
+-> remove global var in redis and db
 -> implement dogpile solution in redis
 -> implement chace leasing
 

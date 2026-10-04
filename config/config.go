@@ -15,17 +15,19 @@ import (
 
 // Config struct maps your environment variables
 type Config struct {
-	ServiceName   string `mapstructure:"SERVICE_NAME"`
-	ServerPort    string `mapstructure:"SERVICE_PORT"`
-	PublicBaseURL string `mapstructure:"PUBLIC_BASE_URL"`
-	MongoURI      string `mapstructure:"MONGODB_CONNECTION_STRING"`
-	MongoUsername string `mapstructure:"MONGODB_USERNAME"`
-	MongoPassword string `mapstructure:"MONGODB_PASSWORD"`
-	RedisAddr     string `mapstructure:"REDIS_HOST"`
-	RedisUsername string `mapstructure:"REDIS_USERNAME"`
-	RedisPassword string `mapstructure:"REDIS_PASSWORD"`
-	RedisDB       int    `mapstructure:"REDIS_DB"`
-	RedisTLS      bool   `mapstructure:"REDIS_TLS"`
+	ServiceName         string `mapstructure:"SERVICE_NAME"`
+	ServerPort          string `mapstructure:"SERVICE_PORT"`
+	PublicBaseURL       string `mapstructure:"PUBLIC_BASE_URL"`
+	MongoURI            string `mapstructure:"MONGODB_CONNECTION_STRING"`
+	MongoUsername       string `mapstructure:"MONGODB_USERNAME"`
+	MongoPassword       string `mapstructure:"MONGODB_PASSWORD"`
+	MongoDatabaseName   string `mapstructure:"MONGODB_DATABASE_NAME"`
+	MongoCollectionName string `mapstructure:"MONGODB_COLLECTION_NAME"`
+	RedisAddr           string `mapstructure:"REDIS_HOST"`
+	RedisUsername       string `mapstructure:"REDIS_USERNAME"`
+	RedisPassword       string `mapstructure:"REDIS_PASSWORD"`
+	RedisDB             int    `mapstructure:"REDIS_DB"`
+	RedisTLS            bool   `mapstructure:"REDIS_TLS"`
 }
 
 func configEnvironmentKeys() []string {

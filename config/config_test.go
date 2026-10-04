@@ -76,7 +76,7 @@ func TestLoadConfigExportsAllValuesToEnvironment(t *testing.T) {
 
 	configDir := t.TempDir()
 	configPath := filepath.Join(configDir, ".env")
-	const contents = "SERVICE_NAME=url-shortener\nSERVICE_PORT=8123\nPUBLIC_BASE_URL=https://short.example\nMONGODB_CONNECTION_STRING=mongodb://localhost\nMONGODB_USERNAME=mongo-user\nMONGODB_PASSWORD=mongo-pass\nREDIS_HOST=localhost:6379\nREDIS_USERNAME=redis-user\nREDIS_PASSWORD=redis-pass\nREDIS_DB=3\nREDIS_TLS=true\n"
+	const contents = "SERVICE_NAME=url-shortener\nSERVICE_PORT=8123\nPUBLIC_BASE_URL=https://short.example\nMONGODB_CONNECTION_STRING=mongodb://localhost\nMONGODB_USERNAME=mongo-user\nMONGODB_PASSWORD=mongo-pass\nMONGODB_DATABASE_NAME=shortener-db\nMONGODB_COLLECTION_NAME=url-mappings\nREDIS_HOST=localhost:6379\nREDIS_USERNAME=redis-user\nREDIS_PASSWORD=redis-pass\nREDIS_DB=3\nREDIS_TLS=true\n"
 	if err := os.WriteFile(configPath, []byte(contents), 0600); err != nil {
 		t.Fatalf("write config file: %v", err)
 	}
@@ -86,17 +86,19 @@ func TestLoadConfigExportsAllValuesToEnvironment(t *testing.T) {
 	}
 
 	want := Config{
-		ServiceName:   "url-shortener",
-		ServerPort:    "8123",
-		PublicBaseURL: "https://short.example",
-		MongoURI:      "mongodb://localhost",
-		MongoUsername: "mongo-user",
-		MongoPassword: "mongo-pass",
-		RedisAddr:     "localhost:6379",
-		RedisUsername: "redis-user",
-		RedisPassword: "redis-pass",
-		RedisDB:       3,
-		RedisTLS:      true,
+		ServiceName:         "url-shortener",
+		ServerPort:          "8123",
+		PublicBaseURL:       "https://short.example",
+		MongoURI:            "mongodb://localhost",
+		MongoUsername:       "mongo-user",
+		MongoPassword:       "mongo-pass",
+		MongoDatabaseName:   "shortener-db",
+		MongoCollectionName: "url-mappings",
+		RedisAddr:           "localhost:6379",
+		RedisUsername:       "redis-user",
+		RedisPassword:       "redis-pass",
+		RedisDB:             3,
+		RedisTLS:            true,
 	}
 	wantValue := reflect.ValueOf(want)
 	wantType := wantValue.Type()

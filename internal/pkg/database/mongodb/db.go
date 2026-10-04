@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -11,11 +12,6 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
-)
-
-const (
-	databaseName   = "url_shortener"
-	collectionName = "url_mappings"
 )
 
 var ErrMappingNotFound = errors.New("URL mapping not found")
@@ -34,6 +30,16 @@ type Client struct {
 func Connect(ctx context.Context, uri string) (*Client, error) {
 	if strings.TrimSpace(uri) == "" {
 		return nil, errors.New("MongoDB connection string is required")
+	}
+
+	databaseName := os.Getenv("MONGODB_DATABASE_NAME")
+	if strings.TrimSpace(databaseName) == "" {
+		return nil, errors.New("MongoDB database name is required")
+	}
+
+	collectionName := os.Getenv("MONGODB_COLLECTION_NAME")
+	if strings.TrimSpace(collectionName) == "" {
+		return nil, errors.New("MongoDB collection name is required")
 	}
 
 	client, err := mongo.Connect(
