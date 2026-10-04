@@ -24,8 +24,9 @@ var (
 	router *mux.Router
 )
 
-func setupRoutes(api gen.DefaultAPIServicer) {
-	urlshortenerController := gen.NewDefaultAPIController(api)
+func setupRoutes(mongoClient *mongodb.Client, redisClient *redis.Client, publicBaseURL string) {
+	urlShortenerImpl := service.NewUrlShortenAPIServiceImpl(mongoClient, redisClient, publicBaseURL)
+	urlshortenerController := gen.NewDefaultAPIController(urlShortenerImpl)
 
 	routers := []gen.Router{
 		urlshortenerController,
@@ -80,59 +81,76 @@ func registerControllers(routers []gen.Router) {
 	}
 }
 
-func main() {
-	// Configure slog to output structured JSON
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	slog.SetDefault(logger)
-
-	if err := run(); err != nil {
-		slog.Error("URL shortener exited", "error", err)
-		os.Exit(1)
+func initMongoDB(ctx context.Context, mongoURI string) (*mongodb.Client, error) {
+	mongoClient, err := mongodb.Connect(ctx, mongoURI)
+	if err != nil {
+		return nil, fmt.Errorf("connect to MongoDB: %w", err)
 	}
+	slog.Info("Connected to MongoDB")
+	return mongoClient, nil
 }
 
-func run() error {
+func initRedis(ctx context.Context, addr, username, password string, db int, tls bool) (*redis.Client, error) {
+	redisClient, err := redis.NewClient(ctx, redis.Options{
+		Addr:     addr,
+		Username: username,
+		Password: password,
+		DB:       db,
+		TLS:      tls,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("connect to Redis: %w", err)
+	}
+	slog.Info("Connected to Redis")
+	return redisClient, nil
+}
+
+func runServer() error {
 	cfg, err := config.LoadConfig(".")
 	if err != nil {
 		return fmt.Errorf("load environment config: %w", err)
 	}
 
-	mongoClient, err := mongodb.Connect(context.Background(), cfg.MongoURI)
+	mongoClient, err := initMongoDB(context.Background(), cfg.MongoURI)
 	if err != nil {
-		return fmt.Errorf("connect to MongoDB: %w", err)
+		return err
 	}
 	defer func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		disconnectCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		if err := mongoClient.Disconnect(ctx); err != nil {
+		if err := mongoClient.Disconnect(disconnectCtx); err != nil {
 			slog.Error("Failed to disconnect from MongoDB", "error", err)
 		}
 	}()
-	slog.Info("Connected to MongoDB")
 
-	redisClient, err := redis.NewClient(context.Background(), redis.Options{
-		Addr:     cfg.RedisAddr,
-		Username: cfg.RedisUsername,
-		Password: cfg.RedisPassword,
-		DB:       cfg.RedisDB,
-		TLS:      cfg.RedisTLS,
-	})
+	redisClient, err := initRedis(context.Background(), cfg.RedisAddr, cfg.RedisUsername, cfg.RedisPassword, cfg.RedisDB, cfg.RedisTLS)
 	if err != nil {
-		return fmt.Errorf("connect to Redis: %w", err)
+		return err
 	}
 	defer func() {
 		if err := redisClient.Close(); err != nil {
 			slog.Error("Failed to close Redis client", "error", err)
 		}
 	}()
-	slog.Info("Connected to Redis")
 
-	api := service.NewUrlShortenAPIServiceImpl(mongoClient, redisClient, cfg.PublicBaseURL)
-	setupRoutes(api)
+	setupRoutes(mongoClient, redisClient, cfg.PublicBaseURL)
+
 	address := fmt.Sprintf(":%s", cfg.ServerPort)
 	slog.Info("Starting URL shortener server", "address", address)
+
 	if err := http.ListenAndServe(address, router); err != nil {
 		return fmt.Errorf("server failed on %s: %w", address, err)
 	}
 	return nil
+}
+
+func main() {
+	// Configure slog to output structured JSON
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
+
+	if err := runServer(); err != nil {
+		slog.Error("URL shortener exited", "error", err)
+		os.Exit(1)
+	}
 }

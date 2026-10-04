@@ -36,7 +36,12 @@ func Connect(ctx context.Context, uri string) (*Client, error) {
 		return nil, errors.New("MongoDB connection string is required")
 	}
 
-	client, err := mongo.Connect(options.Client().ApplyURI(uri))
+	client, err := mongo.Connect(
+		options.Client().
+			ApplyURI(uri).
+			SetMaxPoolSize(100).
+			SetMinPoolSize(10), // setting a minimum pool size to ensure some connections are always available
+	)
 	if err != nil {
 		return nil, fmt.Errorf("create MongoDB client: %w", err)
 	}
