@@ -42,6 +42,10 @@ func configEnvironmentKeys() []string {
 	return keys
 }
 
+func GetEnv(key string) string {
+	return os.Getenv(key)
+}
+
 // LoadConfig reads configuration from file and/or environment variables
 func LoadConfig(path string) (Config, error) {
 	v := viper.New()

@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"log/slog"
 	"net/url"
-	"os"
 	"strings"
 
+	"url-shortener/config"
+	constants "url-shortener/internal/app/common"
 	"url-shortener/internal/pkg/database/mongodb"
-	"url-shortener/internal/pkg/redis"
 )
 
 type MappingStore interface {
@@ -33,7 +33,7 @@ func CreateShortURL(ctx context.Context, longURL string, store MappingStore, cac
 	if err := validateLongURL(longURL); err != nil {
 		return Result{}, err
 	}
-	baseURL := os.Getenv("PUBLIC_BASE_URL")
+	baseURL := config.GetEnv(constants.PUBLIC_BASE_URL)
 	if err := validateBaseURL(baseURL); err != nil {
 		return Result{}, err
 	}
@@ -110,6 +110,3 @@ func validateBaseURL(baseURL string) error {
 	}
 	return nil
 }
-
-var _ MappingStore = (*mongodb.Client)(nil)
-var _ URLCache = (*redis.Client)(nil)

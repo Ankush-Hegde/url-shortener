@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 	"time"
+
+	"url-shortener/config"
+	constants "url-shortener/internal/app/common"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -32,12 +34,12 @@ func Connect(ctx context.Context, uri string) (*Client, error) {
 		return nil, errors.New("MongoDB connection string is required")
 	}
 
-	databaseName := os.Getenv("MONGODB_DATABASE_NAME")
+	databaseName := config.GetEnv(constants.MONGODB_DATABASE_NAME)
 	if strings.TrimSpace(databaseName) == "" {
 		return nil, errors.New("MongoDB database name is required")
 	}
 
-	collectionName := os.Getenv("MONGODB_COLLECTION_NAME")
+	collectionName := config.GetEnv(constants.MONGODB_COLLECTION_NAME)
 	if strings.TrimSpace(collectionName) == "" {
 		return nil, errors.New("MongoDB collection name is required")
 	}

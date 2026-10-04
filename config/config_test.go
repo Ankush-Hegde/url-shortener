@@ -108,7 +108,7 @@ func TestLoadConfigExportsAllValuesToEnvironment(t *testing.T) {
 			continue
 		}
 		expected := fmt.Sprint(wantValue.Field(i).Interface())
-		if got := os.Getenv(key); got != expected {
+		if got := GetEnv(key); got != expected {
 			t.Errorf("%s = %q, want %q", key, got, expected)
 		}
 	}

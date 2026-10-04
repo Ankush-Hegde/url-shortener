@@ -7,8 +7,6 @@ import (
 
 	createshorturl "url-shortener/internal/app/createshorturl"
 	resolveshorturl "url-shortener/internal/app/resolveshorturl"
-	"url-shortener/internal/pkg/database/mongodb"
-	"url-shortener/internal/pkg/redis"
 	"url-shortener/internal/pkg/server/gen"
 )
 
@@ -55,6 +53,3 @@ func (s *URLShortenAPIServiceImpl) ShortCodeGet(ctx context.Context, shortCode s
 	}
 	return gen.Response(http.StatusFound, response), nil
 }
-
-var _ URLStore = (*mongodb.Client)(nil)
-var _ URLCache = (*redis.Client)(nil)

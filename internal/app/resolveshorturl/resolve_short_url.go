@@ -48,6 +48,3 @@ func ResolveShortURL(ctx context.Context, shortCode string, store MappingStore, 
 	}
 	return longURL, nil
 }
-
-var _ MappingStore = (*mongodb.Client)(nil)
-var _ URLCache = (*redis.Client)(nil)
