@@ -1,6 +1,8 @@
 This is the system design project which includes following:<br>
 
 - database caching
+- implemented api controller
+- integrated middleware
 - solution to dogpile effect -> todo
 - implemented cache lease for racecondition -> todo
 - docker and kubernetes -> todo
