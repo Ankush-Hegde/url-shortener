@@ -24,8 +24,8 @@ var (
 	router *mux.Router
 )
 
-func setupRoutes(mongoClient *mongodb.Client, redisClient *redis.Client, publicBaseURL string) {
-	urlShortenerImpl := service.NewUrlShortenAPIServiceImpl(mongoClient, redisClient, publicBaseURL)
+func setupRoutes(mongoClient *mongodb.Client, redisClient *redis.Client) {
+	urlShortenerImpl := service.NewUrlShortenAPIServiceImpl(mongoClient, redisClient)
 	urlshortenerController := gen.NewDefaultAPIController(urlShortenerImpl)
 
 	routers := []gen.Router{
@@ -133,7 +133,7 @@ func runServer() error {
 		}
 	}()
 
-	setupRoutes(mongoClient, redisClient, cfg.PublicBaseURL)
+	setupRoutes(mongoClient, redisClient)
 
 	address := fmt.Sprintf(":%s", cfg.ServerPort)
 	slog.Info("Starting URL shortener server", "address", address)

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/url"
+	"os"
 	"strings"
 
 	"url-shortener/internal/pkg/database/mongodb"
@@ -28,10 +29,11 @@ type Result struct {
 	ShortURL  string
 }
 
-func CreateShortURL(ctx context.Context, longURL, baseURL string, store MappingStore, cache URLCache) (Result, error) {
+func CreateShortURL(ctx context.Context, longURL string, store MappingStore, cache URLCache) (Result, error) {
 	if err := validateLongURL(longURL); err != nil {
 		return Result{}, err
 	}
+	baseURL := os.Getenv("PUBLIC_BASE_URL")
 	if err := validateBaseURL(baseURL); err != nil {
 		return Result{}, err
 	}

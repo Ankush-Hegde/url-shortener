@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"strings"
 
 	createshorturl "url-shortener/internal/app/createshorturl"
 	resolveshorturl "url-shortener/internal/app/resolveshorturl"
@@ -24,21 +23,19 @@ type URLCache interface {
 }
 
 type URLShortenAPIServiceImpl struct {
-	store   URLStore
-	cache   URLCache
-	baseURL string
+	store URLStore
+	cache URLCache
 }
 
-func NewUrlShortenAPIServiceImpl(store URLStore, cache URLCache, baseURL string) gen.DefaultAPIServicer {
+func NewUrlShortenAPIServiceImpl(store URLStore, cache URLCache) gen.DefaultAPIServicer {
 	return &URLShortenAPIServiceImpl{
-		store:   store,
-		cache:   cache,
-		baseURL: strings.TrimRight(baseURL, "/"),
+		store: store,
+		cache: cache,
 	}
 }
 
 func (s *URLShortenAPIServiceImpl) ShortenPost(ctx context.Context, request gen.ShortenPostRequest) (gen.ImplResponse, error) {
-	result, err := createshorturl.CreateShortURL(ctx, request.LongUrl, s.baseURL, s.store, s.cache)
+	result, err := createshorturl.CreateShortURL(ctx, request.LongUrl, s.store, s.cache)
 	if err != nil {
 		return gen.Response(http.StatusInternalServerError, nil), err
 	}

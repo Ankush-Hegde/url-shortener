@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"os"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -22,8 +24,20 @@ type Config struct {
 	RedisAddr     string `mapstructure:"REDIS_HOST"`
 	RedisUsername string `mapstructure:"REDIS_USERNAME"`
 	RedisPassword string `mapstructure:"REDIS_PASSWORD"`
-	RedisDB       int    `mapstructure:"-"`
+	RedisDB       int    `mapstructure:"REDIS_DB"`
 	RedisTLS      bool   `mapstructure:"REDIS_TLS"`
+}
+
+func configEnvironmentKeys() []string {
+	configType := reflect.TypeOf(Config{})
+	keys := make([]string, 0, configType.NumField())
+	for i := 0; i < configType.NumField(); i++ {
+		key := configType.Field(i).Tag.Get("mapstructure")
+		if key != "" && key != "-" {
+			keys = append(keys, key)
+		}
+	}
+	return keys
 }
 
 // LoadConfig reads configuration from file and/or environment variables
@@ -38,19 +52,7 @@ func LoadConfig(path string) (Config, error) {
 	v.SetDefault("REDIS_TLS", false)
 	v.AutomaticEnv()
 
-	for _, key := range []string{
-		"SERVICE_NAME",
-		"SERVICE_PORT",
-		"PUBLIC_BASE_URL",
-		"MONGODB_CONNECTION_STRING",
-		"MONGODB_USERNAME",
-		"MONGODB_PASSWORD",
-		"REDIS_HOST",
-		"REDIS_USERNAME",
-		"REDIS_PASSWORD",
-		"REDIS_DB",
-		"REDIS_TLS",
-	} {
+	for _, key := range configEnvironmentKeys() {
 		if err := v.BindEnv(key); err != nil {
 			return Config{}, fmt.Errorf("bind environment variable %s: %w", key, err)
 		}
@@ -82,6 +84,18 @@ func LoadConfig(path string) (Config, error) {
 
 	if strings.TrimSpace(config.PublicBaseURL) == "" {
 		config.PublicBaseURL = "http://localhost:" + config.ServerPort
+	}
+
+	configValue := reflect.ValueOf(config)
+	configType := configValue.Type()
+	for i := 0; i < configType.NumField(); i++ {
+		key := configType.Field(i).Tag.Get("mapstructure")
+		if key == "" || key == "-" {
+			continue
+		}
+		if err := os.Setenv(key, fmt.Sprint(configValue.Field(i).Interface())); err != nil {
+			return Config{}, fmt.Errorf("set environment variable %s: %w", key, err)
+		}
 	}
 
 	return config, nil

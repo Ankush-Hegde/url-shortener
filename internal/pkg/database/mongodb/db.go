@@ -39,8 +39,8 @@ func Connect(ctx context.Context, uri string) (*Client, error) {
 	client, err := mongo.Connect(
 		options.Client().
 			ApplyURI(uri).
-			SetMaxPoolSize(100).
-			SetMinPoolSize(10), // setting a minimum pool size to ensure some connections are always available
+			SetMaxPoolSize(10).
+			SetMinPoolSize(1), // setting a minimum pool size to ensure some connections are always available
 	)
 	if err != nil {
 		return nil, fmt.Errorf("create MongoDB client: %w", err)

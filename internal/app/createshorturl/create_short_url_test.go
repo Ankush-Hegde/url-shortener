@@ -47,12 +47,13 @@ func (c *testCache) StoreURL(_ context.Context, shortCode, longURL string) error
 }
 
 func TestCreateShortURLPersistsAndReusesMapping(t *testing.T) {
+	t.Setenv("PUBLIC_BASE_URL", "https://short.example")
 	store := newTestStore()
 	cache := &testCache{byShort: make(map[string]string)}
 	ctx := context.Background()
 	longURL := "https://example.com/path"
 
-	first, err := CreateShortURL(ctx, longURL, "https://short.example", store, cache)
+	first, err := CreateShortURL(ctx, longURL, store, cache)
 	if err != nil {
 		t.Fatalf("CreateShortURL() error = %v", err)
 	}
@@ -69,7 +70,7 @@ func TestCreateShortURLPersistsAndReusesMapping(t *testing.T) {
 		t.Errorf("Redis cache = %q, want %q", cache.byShort[first.ShortCode], longURL)
 	}
 
-	second, err := CreateShortURL(ctx, longURL, "https://short.example", store, cache)
+	second, err := CreateShortURL(ctx, longURL, store, cache)
 	if err != nil {
 		t.Fatalf("CreateShortURL() for existing URL error = %v", err)
 	}
@@ -82,10 +83,10 @@ func TestCreateShortURLPersistsAndReusesMapping(t *testing.T) {
 }
 
 func TestCreateShortURLRejectsNonHTTPURL(t *testing.T) {
+	t.Setenv("PUBLIC_BASE_URL", "https://short.example")
 	_, err := CreateShortURL(
 		context.Background(),
 		"javascript:alert(1)",
-		"https://short.example",
 		newTestStore(),
 		&testCache{byShort: make(map[string]string)},
 	)
@@ -95,10 +96,10 @@ func TestCreateShortURLRejectsNonHTTPURL(t *testing.T) {
 }
 
 func TestCreateShortURLRejectsEmptyBaseURL(t *testing.T) {
+	t.Setenv("PUBLIC_BASE_URL", "")
 	_, err := CreateShortURL(
 		context.Background(),
 		"https://example.com",
-		"",
 		newTestStore(),
 		&testCache{byShort: make(map[string]string)},
 	)
@@ -117,11 +118,11 @@ func (s failingStore) FindLongURL(context.Context, string) (string, error) {
 }
 
 func TestCreateShortURLSurfacesStoreErrors(t *testing.T) {
+	t.Setenv("PUBLIC_BASE_URL", "https://short.example")
 	wantErr := errors.New("database unavailable")
 	_, err := CreateShortURL(
 		context.Background(),
 		"https://example.com",
-		"https://short.example",
 		&failingStore{err: wantErr},
 		&testCache{byShort: make(map[string]string)},
 	)

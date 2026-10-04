@@ -37,8 +37,8 @@ func NewClient(ctx context.Context, options Options) (*Client, error) {
 		Username:     options.Username,
 		Password:     options.Password,
 		DB:           options.DB,
-		PoolSize:     20, // Max number of socket connections
-		MinIdleConns: 5,  // Minimum idle connections to keep open
+		PoolSize:     2, // Max number of socket connections
+		MinIdleConns: 1, // Minimum idle connections to keep open
 	}
 	if options.TLS {
 		redisOptions.TLSConfig = &tls.Config{MinVersion: tls.VersionTLS12}
