@@ -16,8 +16,8 @@ import (
 )
 
 type MappingStore interface {
-	FindLongURL(context.Context, string) (string, error)
-	CreateMapping(context.Context, string, string) error
+	QueryLongURL(context.Context, string) (string, error)
+	CreateEntry(context.Context, string, string) error
 }
 
 type URLCache interface {
@@ -38,21 +38,19 @@ func CreateShortURL(ctx context.Context, longURL string, store MappingStore, cac
 		return Result{}, err
 	}
 
-	shortCode, err := store.FindLongURL(ctx, longURL)
+	shortCode, err := store.QueryLongURL(ctx, longURL)
 	if err != nil && !errors.Is(err, mongodb.ErrMappingNotFound) {
 		return Result{}, fmt.Errorf("check for existing URL mapping: %w", err)
 	}
 
 	if errors.Is(err, mongodb.ErrMappingNotFound) {
-		shortCode, err = createMapping(ctx, store, longURL)
+		shortCode, err = createEntry(ctx, store, longURL)
 		if err != nil {
 			return Result{}, err
 		}
 	}
 
-	if err := cache.StoreURL(ctx, shortCode, longURL); err != nil {
-		slog.Warn("URL mapping saved in MongoDB but not cached in Redis", "short_code", shortCode, "error", err)
-	}
+	slog.Warn("URL mapping saved in MongoDB but not cached in Redis", "short_code", shortCode, "error", err)
 
 	return Result{
 		ShortCode: shortCode,
@@ -60,7 +58,7 @@ func CreateShortURL(ctx context.Context, longURL string, store MappingStore, cac
 	}, nil
 }
 
-func createMapping(ctx context.Context, store MappingStore, longURL string) (string, error) {
+func createEntry(ctx context.Context, store MappingStore, longURL string) (string, error) {
 	const attempts = 5
 	for range attempts {
 		shortCode, err := generateShortCode()
@@ -68,13 +66,13 @@ func createMapping(ctx context.Context, store MappingStore, longURL string) (str
 			return "", fmt.Errorf("generate short code: %w", err)
 		}
 
-		if err := store.CreateMapping(ctx, shortCode, longURL); err == nil {
+		if err := store.CreateEntry(ctx, shortCode, longURL); err == nil {
 			return shortCode, nil
 		} else if !errors.Is(err, mongodb.ErrMappingConflict) {
 			return "", fmt.Errorf("save URL mapping: %w", err)
 		}
 
-		existingCode, lookupErr := store.FindLongURL(ctx, longURL)
+		existingCode, lookupErr := store.QueryLongURL(ctx, longURL)
 		if lookupErr == nil {
 			return existingCode, nil
 		}

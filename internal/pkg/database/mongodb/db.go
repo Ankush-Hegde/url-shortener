@@ -73,7 +73,7 @@ func Connect(ctx context.Context, uri string) (*Client, error) {
 	return &Client{client: client, collection: collection}, nil
 }
 
-func (c *Client) FindLongURL(ctx context.Context, longURL string) (string, error) {
+func (c *Client) QueryLongURL(ctx context.Context, longURL string) (string, error) {
 	var mapping URLMapping
 	err := c.collection.FindOne(ctx, bson.D{{Key: "long_url", Value: longURL}}).Decode(&mapping)
 	if errors.Is(err, mongo.ErrNoDocuments) {
@@ -85,7 +85,7 @@ func (c *Client) FindLongURL(ctx context.Context, longURL string) (string, error
 	return mapping.ShortCode, nil
 }
 
-func (c *Client) FindShortCode(ctx context.Context, shortCode string) (string, error) {
+func (c *Client) GetRedirectUrl(ctx context.Context, shortCode string) (string, error) {
 	var mapping URLMapping
 	err := c.collection.FindOne(ctx, bson.D{{Key: "short_code", Value: shortCode}}).Decode(&mapping)
 	if errors.Is(err, mongo.ErrNoDocuments) {
@@ -97,7 +97,7 @@ func (c *Client) FindShortCode(ctx context.Context, shortCode string) (string, e
 	return mapping.LongURL, nil
 }
 
-func (c *Client) CreateMapping(ctx context.Context, shortCode, longURL string) error {
+func (c *Client) CreateEntry(ctx context.Context, shortCode, longURL string) error {
 	_, err := c.collection.InsertOne(ctx, URLMapping{
 		ShortCode: shortCode,
 		LongURL:   longURL,

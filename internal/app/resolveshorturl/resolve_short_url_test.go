@@ -15,7 +15,7 @@ type testStore struct {
 	calls   int
 }
 
-func (s *testStore) FindShortCode(context.Context, string) (string, error) {
+func (s *testStore) GetRedirectUrl(context.Context, string) (string, error) {
 	s.calls++
 	return s.longURL, s.err
 }

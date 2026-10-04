@@ -20,7 +20,7 @@ func newTestStore() *testStore {
 	}
 }
 
-func (s *testStore) FindLongURL(_ context.Context, longURL string) (string, error) {
+func (s *testStore) QueryLongURL(_ context.Context, longURL string) (string, error) {
 	code, ok := s.byLong[longURL]
 	if !ok {
 		return "", mongodb.ErrMappingNotFound
@@ -28,7 +28,7 @@ func (s *testStore) FindLongURL(_ context.Context, longURL string) (string, erro
 	return code, nil
 }
 
-func (s *testStore) CreateMapping(_ context.Context, shortCode, longURL string) error {
+func (s *testStore) CreateEntry(_ context.Context, shortCode, longURL string) error {
 	if _, exists := s.byLong[longURL]; exists {
 		return mongodb.ErrMappingConflict
 	}
@@ -113,7 +113,7 @@ type failingStore struct {
 	err error
 }
 
-func (s failingStore) FindLongURL(context.Context, string) (string, error) {
+func (s failingStore) GetLongUrl(context.Context, string) (string, error) {
 	return "", s.err
 }
 

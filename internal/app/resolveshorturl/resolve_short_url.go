@@ -12,7 +12,7 @@ import (
 )
 
 type MappingStore interface {
-	FindShortCode(context.Context, string) (string, error)
+	GetRedirectUrl(context.Context, string) (string, error)
 }
 
 type URLCache interface {
@@ -35,7 +35,7 @@ func ResolveShortURL(ctx context.Context, shortCode string, store MappingStore, 
 		slog.Warn("Redis lookup failed; falling back to MongoDB", "short_code", shortCode, "error", cacheErr)
 	}
 
-	longURL, err := store.FindShortCode(ctx, shortCode)
+	longURL, err := store.GetRedirectUrl(ctx, shortCode)
 	if errors.Is(err, mongodb.ErrMappingNotFound) {
 		return "", ErrShortURLNotFound
 	}
