@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"encoding/json"
 	"net/http"
+	"net/http/httptest"
 	"slices"
 	"strings"
 )
@@ -48,4 +50,30 @@ func ValidateRequest(w http.ResponseWriter, r *http.Request, next http.Handler) 
 
 	// If everything passes, move to the next handler/controller
 	next.ServeHTTP(w, r)
+}
+
+func AddLocationHeader(w http.ResponseWriter, r *http.Request, next http.Handler) {
+	response := httptest.NewRecorder()
+	next.ServeHTTP(response, r)
+
+	for name, values := range response.Header() {
+		for _, value := range values {
+			w.Header().Add(name, value)
+		}
+	}
+
+	if response.Code == http.StatusFound {
+		var body struct {
+			URL string `json:"url"`
+		}
+		if err := json.Unmarshal(response.Body.Bytes(), &body); err == nil || body.URL != "" {
+			w.Header().Set("Location", body.URL)
+		}
+
+		w.WriteHeader(response.Code)
+		return
+	}
+
+	w.WriteHeader(response.Code)
+	_, _ = w.Write(response.Body.Bytes())
 }

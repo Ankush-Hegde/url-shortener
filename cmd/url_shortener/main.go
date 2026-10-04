@@ -67,6 +67,7 @@ func setupRoutes(mongoClient *mongodb.Client, redisClient *redis.Client) {
 	// middleware
 	router.Use(middleware.ValidateRequestMiddleware)
 	router.Use(middleware.CorsMiddleware)
+	router.Use(middleware.RedirectMiddleware)
 }
 
 func registerControllers(routers []gen.Router) {

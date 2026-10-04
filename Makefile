@@ -1,5 +1,5 @@
 App=url-shortener
-GEM_PATH="internal/pkg/server/gen"
+GEN_PATH="internal/pkg/server/gen"
 GEN_TOOL="./tools/openapi-generator-cli.jar"
 OPEN_API_GENERATOR_IGNORE="./api/.openapi-generator-ignore"
 URL_SHORTENER_OPENAPI_SPEC="api/url-shortener/url-shortener.openapi.yaml"
@@ -22,7 +22,7 @@ docker:
 generate-server:
 	@if [ -d $(App) ]; then \
 		echo "Removing existing generated server code..."; \
-		rm -r $(App); \
+		rm -r $(GEN_PATH); \
 	fi
 	@if [ ! -d "internal/pkg/server" ]; then \
 		echo "Target directory missing. Initializing workspace layout..."; \

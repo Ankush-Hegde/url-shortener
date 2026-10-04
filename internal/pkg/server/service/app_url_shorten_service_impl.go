@@ -51,5 +51,7 @@ func (s *URLShortenAPIServiceImpl) ShortCodeGet(ctx context.Context, shortCode s
 		}
 		return gen.Response(http.StatusInternalServerError, nil), err
 	}
-	return gen.Response(http.StatusFound, response), nil
+	return gen.Response(http.StatusFound, struct {
+		URL string `json:"url"`
+	}{URL: response}), nil
 }
