@@ -10,6 +10,7 @@ import (
 	"time"
 	"url-shortener/config"
 	"url-shortener/internal/pkg/database/mongodb"
+	"url-shortener/internal/pkg/redis"
 	"url-shortener/internal/pkg/server/gen"
 	"url-shortener/internal/pkg/server/middleware"
 	"url-shortener/internal/pkg/server/service"
@@ -23,9 +24,8 @@ var (
 	router *mux.Router
 )
 
-func setupRoutes() {
-	urlShortenerImpl := service.NewUrlShortenAPIServiceImpl()
-	urlshortenerController := gen.NewDefaultAPIController(urlShortenerImpl)
+func setupRoutes(api gen.DefaultAPIServicer) {
+	urlshortenerController := gen.NewDefaultAPIController(api)
 
 	routers := []gen.Router{
 		urlshortenerController,
@@ -110,7 +110,25 @@ func run() error {
 	}()
 	slog.Info("Connected to MongoDB")
 
-	setupRoutes()
+	redisClient, err := redis.NewClient(context.Background(), redis.Options{
+		Addr:     cfg.RedisAddr,
+		Username: cfg.RedisUsername,
+		Password: cfg.RedisPassword,
+		DB:       cfg.RedisDB,
+		TLS:      cfg.RedisTLS,
+	})
+	if err != nil {
+		return fmt.Errorf("connect to Redis: %w", err)
+	}
+	defer func() {
+		if err := redisClient.Close(); err != nil {
+			slog.Error("Failed to close Redis client", "error", err)
+		}
+	}()
+	slog.Info("Connected to Redis")
+
+	api := service.NewUrlShortenAPIServiceImpl(mongoClient, redisClient, cfg.PublicBaseURL)
+	setupRoutes(api)
 	address := fmt.Sprintf(":%s", cfg.ServerPort)
 	slog.Info("Starting URL shortener server", "address", address)
 	if err := http.ListenAndServe(address, router); err != nil {

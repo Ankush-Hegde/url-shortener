@@ -12,6 +12,8 @@ services:
     build:
       context: .
       target: final
+    env_file:
+      - .env
     ports:
       - 8089:8089
 
@@ -47,4 +49,3 @@ services:
 # secrets:
 #   db-password:
 #     file: db/password.txt
-
