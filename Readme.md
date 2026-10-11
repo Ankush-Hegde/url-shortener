@@ -8,6 +8,10 @@ This is the system design project which includes following:<br>
 - docker and kubernetes -> todo
 - openapi spec with swagger-ui, run below command in third_party dir
     ```
+    >git clone https://github.com/swagger-api/swagger-ui
+    ```
+    path
+    ```
     http://localhost:8089/doc/swagger-ui/
     ```
 
